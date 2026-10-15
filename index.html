@@ -620,7 +620,7 @@ th{font-weight:600;color:var(--soft)}
   let draft = null, editing = null, lastFocus = null;
   function openSheet(d, edit){
     lastFocus = document.activeElement;
-    draft = {type:"out", amount:"", label:"", cat:"", sub:"", subId:"", wallet:"wave", where:"", why:"", source:"", from:"wave", to:"cash", date:today(), note:"", ...d};
+    draft = {type:"out", amount:"", label:"", cat:"", sub:"", subId:"", wallet:"", where:"", why:"", source:"", from:"", to:"", date:today(), note:"", ...d};
     editing = edit || null;
     $("sheetBack").hidden = false; document.body.style.overflow = "hidden";
     renderSheet();
@@ -672,13 +672,16 @@ th{font-weight:600;color:var(--soft)}
     let tx;
     if (d.type === "out") {
       if (!d.cat) { msg.textContent = "Pick a category."; return; }
+      if (!d.wallet) { msg.textContent = "Pick how you paid: Cash, Wave, Card or Savings."; return; }
       const s = d.subId ? subs.get(d.subId) : null;
       tx = {type:"out", amount, date:d.date, wallet:d.wallet, cat:d.cat, sub: s ? s.name : d.sub, label: d.label.trim() || (s ? s.name : d.sub) || cat(d.cat).name, where:d.where.trim(), why:d.why, note:d.note.trim()};
       if (d.subId) tx.subId = d.subId;
     } else if (d.type === "in") {
       if (!d.source) { msg.textContent = "Pick where it comes from."; return; }
+      if (!d.wallet) { msg.textContent = "Pick where the money went: Cash, Wave, Card or Savings."; return; }
       tx = {type:"in", amount, date:d.date, wallet:d.wallet, source:d.source, label:d.label.trim() || srcName(d.source), note:d.note.trim()};
     } else {
+      if (!d.from || !d.to) { msg.textContent = "Pick where the money moves from and to."; return; }
       if (d.from === d.to) { msg.textContent = "From and To need to be different."; return; }
       tx = {type:"move", amount, date:d.date, from:d.from, to:d.to, note:d.note.trim()};
     }
@@ -725,7 +728,7 @@ th{font-weight:600;color:var(--soft)}
       openSheet({...t, amount:String(t.amount), label: t.type === "out" && t.label === (t.sub || cat(t.cat).name) ? "" : t.type === "in" && t.label === srcName(t.source) ? "" : (t.label || "")},
         {id:el.dataset.id, m:el.dataset.m, createdAt:t.createdAt}); },
     close: () => closeSheet(),
-    type: el => { syncDraft(); draft.type = el.dataset.k; renderSheet(); },
+    type: el => { syncDraft(); if (draft.type !== el.dataset.k) { draft.type = el.dataset.k; draft.wallet = draft.from = draft.to = ""; } renderSheet(); },
     pick: el => {
       syncDraft();
       const k = el.dataset.k, v = el.dataset.v;
