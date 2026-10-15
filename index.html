@@ -276,8 +276,10 @@ th{font-weight:600;color:var(--soft)}
   const shiftM = (key, k) => { const [y, m] = key.split("-").map(Number); return mKey(new Date(y, m - 1 + k, 1)); };
   const mName = (key, o = {month:"long"}) => new Date(key + "-15T12:00:00").toLocaleDateString("en-GB", o);
   const nf = new Intl.NumberFormat("fr-FR", {style:"currency", currency:"XOF", maximumFractionDigits:0});
-  const fmt = n => nf.format(Math.round(n || 0));
-  const nfPlain = new Intl.NumberFormat("fr-FR", {maximumFractionDigits:0});
+  // French formatting uses a narrow space the body font draws too thin, so swap in a regular no-break space.
+  const wide = s => s.replace(/[\u202f\u2009]/g, "\u00a0");
+  const fmt = n => wide(nf.format(Math.round(n || 0)));
+  const nfPlain = {format: n => wide(new Intl.NumberFormat("fr-FR", {maximumFractionDigits:0}).format(n))};
   const short = n => n >= 1e6 ? (Math.round(n / 1e5) / 10 + "M").replace(".", ",") : n >= 1000 ? Math.round(n / 1000) + "k" : String(Math.round(n));
   const parseAmount = s => { const n = parseFloat(String(s ?? "").replace(/[\s  ]/g, "").replace(",", ".")); return isFinite(n) && n > 0 ? Math.round(n) : null; };
   const cat = id => CATS.find(c => c.id === id) || CATS[CATS.length - 1];

@@ -1,5 +1,5 @@
 // Keeps the app working offline. Bump CACHE when the app files change.
-const CACHE = "tai-money-v2";
+const CACHE = "tai-money-v3";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "apple-touch-icon.png", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
